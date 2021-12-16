@@ -36,7 +36,8 @@ function App() {
         originY: 'center',
         top: canvas.height / 2,
         left: canvas.width / 2,
-        globalCompositeOperation: 'destination-over'
+        globalCompositeOperation: 'destination-over',
+        crossOrigin: "anonymous"
       })
       // After a fail with keep aspect ratio I removed these controls
       img.setControlsVisibility({
@@ -55,7 +56,7 @@ function App() {
     )
   }
 
-  const addImg = async (e, url) => {
+  const addImg = async (e, url, isLink) => {
     setShowActionButtons(true);
     e.preventDefault();
     // reset nowClip after recent crop
@@ -129,6 +130,7 @@ function App() {
       originY: 'center',
       top: canvas.height / 2,
       left: canvas.width / 2,
+      crossOrigin: "anonymous"
     })
     nowClip.x += newImgCrop.left;
     nowClip.y += newImgCrop.top;
@@ -136,7 +138,6 @@ function App() {
       left: totalShiftOfInCanvas/2,
       top: totalShiftOfInCanvas/2
     })
-    console.log(image);
     userClipPath.setCoords();
     canvas.renderAll();
   }
