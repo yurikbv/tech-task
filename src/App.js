@@ -56,7 +56,7 @@ function App() {
     )
   }
 
-  const addImg = async (e, url, isLink) => {
+  const addImg = async (e, url) => {
     setShowActionButtons(true);
     e.preventDefault();
     // reset nowClip after recent crop

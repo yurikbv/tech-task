@@ -27,14 +27,14 @@ const UploadImageForm = ({addImg, imgURL, setImgURL}) => {
     const reader = new FileReader();
     reader.onload = function (f) {
       let data = f.target.result;
-      addImg(e, data, false);
+      addImg(e, data);
     };
     reader.readAsDataURL(file);
   }
   
   return (
     <div className="upload__form--block">
-      <form onSubmit={e => addImg(e, imgURL, true)} className="upload__form">
+      <form onSubmit={e => addImg(e, imgURL)} className="upload__form">
         <input
           type="text"
           value={imgURL}
