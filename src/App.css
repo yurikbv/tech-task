@@ -48,3 +48,8 @@ body {
 .action__crop {
   background-color: lawngreen;
 }
+
+.action__download {
+  color: black;
+  background-color: lightgrey;
+}

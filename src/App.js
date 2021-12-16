@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, Fragment} from "react";
 import {fabric} from "fabric";
 import UploadImageForm from "./components/UploadImageForm/UploadImageForm";
 import './App.css';
@@ -18,12 +18,14 @@ function App() {
   const [isCropMode, setIsCropMode] = useState(false);
   const [ dimensions, setDimensions ] = useState({width: 0, height: 0});
   
-  const renderMainCanvas = async (url) => {
+  const totalShiftOfInCanvas = 16;
+  
+  const renderMainCanvas = async (url, isLink) => {
     // Add our image to canvas
     await new fabric.Image.fromURL(url, img => {
       //set offset 16px to see controls
-      canvas.setHeight(img.height + 16);
-      canvas.setWidth(img.width + 16);
+      canvas.setHeight(img.height + totalShiftOfInCanvas);
+      canvas.setWidth(img.width + totalShiftOfInCanvas);
       //set up an image
       img.set({
         angle: 0,
@@ -34,7 +36,8 @@ function App() {
         originY: 'center',
         top: canvas.height / 2,
         left: canvas.width / 2,
-        globalCompositeOperation: 'destination-over'
+        globalCompositeOperation: 'destination-over',
+        crossOrigin: 'anonymous'
       })
       // After a fail with keep aspect ratio I removed these controls
       img.setControlsVisibility({
@@ -53,20 +56,21 @@ function App() {
     )
   }
 
-  const addImg = async (e, url) => {
+  const addImg = async (e, url, isLink) => {
+    setShowActionButtons(true);
     e.preventDefault();
     // reset nowClip after recent crop
     nowClip = {x: 0, y: 0}
     // trigger to show action buttons
-    setShowActionButtons(true);
     canvas = new fabric.Canvas('canvas');
     // set canvas to allow us to choose image layer and crop layer
     canvas.set({
       controlsAboveOverlay: true,
-      preserveObjectStacking: true
+      preserveObjectStacking: true,
+      crossOrigin: 'anonymous'
     })
     // add our image to canvas
-    await renderMainCanvas(url);
+    await renderMainCanvas(url, isLink);
   }
   
   const createCropArea = async () => {
@@ -74,8 +78,8 @@ function App() {
     setIsCropMode(true);
     // create rect canvas object to choose crop area and set this object
     userClipPath = new fabric.Rect({
-      top: 8,
-      left: 8,
+      top: totalShiftOfInCanvas / 2,
+      left: totalShiftOfInCanvas / 2,
       width: image.width,
       height: image.height,
       transparentCorners: false,
@@ -110,8 +114,6 @@ function App() {
   const handleCropImage = () => {
     // show the action buttons
     setIsCropMode(true);
-    // our offset
-    const totalShiftOfInCanvas = 16;
     // get left, top, width, height of crop area
     const newImgCrop = userClipPath.getBoundingRect();
     // get left, top of image
@@ -136,6 +138,7 @@ function App() {
       left: totalShiftOfInCanvas/2,
       top: totalShiftOfInCanvas/2
     })
+    console.log(image);
     userClipPath.setCoords();
     canvas.renderAll();
   }
@@ -161,20 +164,52 @@ function App() {
     }
   }*/
   
+  const handleDownloadCroppedImage = () => {
+    // hide the crop area
+    userClipPath.opacity = 0;
+    // settings to output url
+    const dataURL = canvas.toDataURL({
+      format: `image/png`,
+      top: 0,
+      left: 0,
+      width: canvas.width,
+      height: canvas.height,
+      multiplier: 1
+    });
+    // create a temp link
+    const a = document.createElement('a')
+    // assign to this link our image's downloader
+    a.href = dataURL;
+    // name of image
+    a.download = `${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    // remove a temp link
+    document.body.removeChild(a);
+    userClipPath.opacity = 1;
+    canvas.renderAll();
+  }
+  
   return (
     <div className="upload__image">
       {showActionButtons &&
-      <>
+      <Fragment>
         <div className="upload__buttons--action">
           <button type="button" className="action__clear" onClick={handleClearCanvas}>Clear</button>
           {isCropMode
-          && <button type="button" className="action__crop" onClick={handleCropImage}>Crop</button>}
+          && <Fragment>
+              <button type="button" className="action__crop" onClick={handleCropImage}>
+                Crop
+              </button>
+              <button type="button" className="action__download" onClick={handleDownloadCroppedImage}>
+                Download
+              </button>
+          </Fragment>}
         </div>
-        <div onDoubleClick={() => {if (!isCropMode) createCropArea()}}>
-          <canvas id="canvas"/>
-        </div>
-      </>
-      }
+      </Fragment>}
+      <div onDoubleClick={() => {if (!isCropMode) createCropArea()}}>
+        <canvas id="canvas"/>
+      </div>
       <UploadImageForm addImg={addImg} imgURL={imgURL} setImgURL={setImgURL}/>
     </div>
   );
