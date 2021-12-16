@@ -20,7 +20,7 @@ function App() {
   
   const totalShiftOfInCanvas = 16;
   
-  const renderMainCanvas = async (url, isLink) => {
+  const renderMainCanvas = async (url) => {
     // Add our image to canvas
     await new fabric.Image.fromURL(url, img => {
       //set offset 16px to see controls
@@ -36,8 +36,7 @@ function App() {
         originY: 'center',
         top: canvas.height / 2,
         left: canvas.width / 2,
-        globalCompositeOperation: 'destination-over',
-        crossOrigin: 'anonymous'
+        globalCompositeOperation: 'destination-over'
       })
       // After a fail with keep aspect ratio I removed these controls
       img.setControlsVisibility({
@@ -56,7 +55,7 @@ function App() {
     )
   }
 
-  const addImg = async (e, url, isLink) => {
+  const addImg = async (e, url) => {
     setShowActionButtons(true);
     e.preventDefault();
     // reset nowClip after recent crop
@@ -66,11 +65,10 @@ function App() {
     // set canvas to allow us to choose image layer and crop layer
     canvas.set({
       controlsAboveOverlay: true,
-      preserveObjectStacking: true,
-      crossOrigin: 'anonymous'
+      preserveObjectStacking: true
     })
     // add our image to canvas
-    await renderMainCanvas(url, isLink);
+    await renderMainCanvas(url);
   }
   
   const createCropArea = async () => {
